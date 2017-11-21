@@ -29,7 +29,9 @@ def load(directory='orl_faces', train_count=5):
         training_data = []
         testing_data = []
         training_label = []
-        test_label = []
+        testing_label = []
+        training_shape = []
+        testing_shape = []
         for folder in sorted(os.listdir(directory), key=numerical_sort):
             path = directory + '/' + folder
             if os.path.isdir(path):
@@ -38,27 +40,33 @@ def load(directory='orl_faces', train_count=5):
                     raise Exception("Number of required train samples is larger than the available samples.")
                 counter = 0
                 for i in range(1, len(files), 2):
+                    image = imread(path + '/' + files[i])
                     if counter < train_count:
-                        training_data.append(imread(path + '/' + files[i]).flatten())
+                        training_data.append(image.flatten())
                         training_label.append(folder)
+                        training_shape.append(image.shape)
                         counter += 1
                     else:
-                        testing_data.append(imread(path + '/' + files[i]).flatten())
-                        test_label.append(folder)
+                        testing_data.append(image.flatten())
+                        testing_label.append(folder)
+                        testing_shape.append(image.shape)
                 for i in range(0, len(files), 2):
+                    image = imread(path + '/' + files[i])
                     if counter < train_count:
-                        training_data.append(imread(path + '/' + files[i]).flatten())
+                        training_data.append(image.flatten())
                         training_label.append(folder)
+                        training_shape.append(image.shape)
                         counter += 1
                     else:
-                        testing_data.append(imread(path + '/' + files[i]).flatten())
-                        test_label.append(folder)
+                        testing_data.append(image.flatten())
+                        testing_label.append(folder)
+                        testing_shape.append(image.shape)
     except Exception as e:
         print(e)
     else:
-        return numpy.asmatrix(training_data), numpy.asmatrix(testing_data), numpy.asarray(training_label), \
-               numpy.asarray(test_label)
+        return numpy.asmatrix(training_data), numpy.asarray(training_label), numpy.asarray(training_shape),\
+               numpy.asmatrix(testing_data), numpy.asarray(testing_label), numpy.asarray(testing_shape)
 
 
 if __name__ == '__main__':
-    train_data, test_data, train_labels, test_labels = load(train_count=7)
+    train_data, train_labels, train_shape, test_data, test_labels, test_shape = load(train_count=7)
