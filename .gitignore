@@ -101,3 +101,6 @@ ENV/
 .mypy_cache/
 BSR_bsds500.tgz
 BSR
+
+# idea
+.idea/
