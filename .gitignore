@@ -99,3 +99,5 @@ ENV/
 
 # mypy
 .mypy_cache/
+BSR_bsds500.tgz
+BSR
