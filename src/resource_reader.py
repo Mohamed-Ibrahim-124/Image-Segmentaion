@@ -30,7 +30,7 @@ def load_testset(num=500):
     abs_file_path = sorted(
         map(lambda x: os.path.join(DATASET_PATH, x), os.listdir(DATASET_PATH))
     )
-    for fd in p:
+    for fd in abs_file_path:
         try:
             x =  imresize(
                 imread(fd),
