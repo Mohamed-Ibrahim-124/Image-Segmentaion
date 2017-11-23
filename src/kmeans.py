@@ -31,7 +31,7 @@ def compute_new_centroids(data, assignments):
     :return: new centroids
     :rtype: numpy matrix, shape(n_clusters, n_features)
     """
-    # Sorting data samples such that samples belongs to the same cluster are grouped together.
+    # Sorting data samples such that samples belong to the same cluster are grouped together.
     order = np.argsort(assignments)
     data = data[order]
     # calculating number of samples per cluster
