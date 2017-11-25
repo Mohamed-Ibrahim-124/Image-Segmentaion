@@ -1,5 +1,3 @@
-from os import getcwd, path
-
 from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
 from random import sample
@@ -115,7 +113,7 @@ def compute_cost(data, assignments, centroids):
     return cost / centroids.shape[0]
 
 
-def kmeans(data, threshold, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
+def kmeans(data, threshold=0.01, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
     """
     Compute k-means clustering on given data samples
 
@@ -160,13 +158,18 @@ def kmeans(data, threshold, k=2, max_iters=100, distance_func=euclidean_distance
 
 def evaluate_kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
     """
-    Run Kmeans clustering on data multiple times(num_eval) and report result with min cost
+    Run Kmeans clustering on given data samples multiple times(num_eval) and report result with min cost
 
     :param data: data samples
+    :type data: numpy matrix, shape(n_samples, n_features)
     :param num_eval: number of times to run kmeans on the given data
+    :type num_eval: int
     :param threshold: error ratio used by kmeans
+    :type threshold: float
     :param k: number of clusters used by kmeans
+    :type k: int
     :param max_iters: max number of iteration used by kmeans
+    :type max_iters: int
     :param distance_func: function used by kmeans to compute distance (dissimilarity) between samples and centroids
     :type distance_func: function, (optional)
     :param centroids: k initial centroids used by kmeans.
@@ -178,20 +181,19 @@ def evaluate_kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func
     best_centroids = best_assignments = None
     for i in range(num_eval):
         # computing kmeans on the given data samples
-        centroids, assignments = kmeans(data, threshold, k, max_iters, distance_func, centroids)
+        centers, assignments = kmeans(data, threshold, k, max_iters, distance_func, centroids)
         # computing cost function
-        temp_cost = compute_cost(data, assignments, centroids)
+        temp_cost = compute_cost(data, assignments, centers)
         if temp_cost < cost or i == 0:
             cost = temp_cost
             best_assignments = assignments
-            best_centroids = centroids
+            best_centroids = centers
     return best_centroids, best_assignments
 
 
 if __name__ == '__main__':
-    from scipy.misc import imread, imsave, imshow
+    from scipy.misc import imshow
     from src import resource_reader as rr
-    print(path.split(getcwd()))
     train_image = next(rr.request_data())[0]
     image_shape = train_image.shape
     train_image = train_image.reshape((train_image.shape[0] * train_image.shape[1], 3))
