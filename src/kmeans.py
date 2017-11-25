@@ -1,3 +1,5 @@
+from os import getcwd, path
+
 from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
 from random import sample
@@ -141,6 +143,7 @@ def kmeans(data, threshold, k=2, max_iters=100, distance_func=euclidean_distance
     assignments = None
     for i in range(max_iters):
         # calculate distances
+        # print("Helo")
         distances = distance_func(data, centroids)
         # Assigning samples to clusters
         assignments = np.argmin(distances, axis=1)
@@ -186,12 +189,13 @@ def evaluate_kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func
 
 
 if __name__ == '__main__':
-    from scipy.misc import imread, imsave
-    train_image = imread('BSR/BSDS500/data/images/train/16052.jpg')
+    from scipy.misc import imread, imsave, imshow
+    from src import resource_reader as rr
+    print(path.split(getcwd()))
+    train_image = next(rr.request_data())[0]
     image_shape = train_image.shape
     train_image = train_image.reshape((train_image.shape[0] * train_image.shape[1], 3))
     k_clusters = 5
     best = evaluate_kmeans(train_image, 5, 0.0001, k_clusters)
     image2 = draw_clusters(best[1], k_clusters, image_shape, best[0])
-    imsave('test.png', image2)
-
+    imshow(image2)

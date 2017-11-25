@@ -1,13 +1,13 @@
-import os 
-import numpy as np
+from os import path, getcwd, listdir
 from scipy.misc import imread, imresize
 from scipy.io import loadmat
+from src.misc import handle_mat_struct
 
-#downresizing to accelerate computation 
-RES = (30, 30)
+# down resizing to accelerate computation
+RES = (500, 500)
 
-DATASET_PATH = os.path.join(
-    os.path.split(os.getcwd())[0],
+DATASET_PATH = path.join(
+    getcwd(),
     "BSR",
     "BSDS500",
     "data",
@@ -15,8 +15,8 @@ DATASET_PATH = os.path.join(
     "test"
 )
 
-GROUND_TRUTH = os.path.join(
-    os.path.split(os.getcwd())[0],
+GROUND_TRUTH = path.join(
+    getcwd(),
     "BSR",
     "BSDS500",
     "data",
@@ -25,45 +25,55 @@ GROUND_TRUTH = os.path.join(
 )
 
 
-
-def load_testset(num=500):
+def _load_test_set():
     abs_file_path = sorted(
-        map(lambda x: os.path.join(DATASET_PATH, x), os.listdir(DATASET_PATH))
+        map(lambda z: path.join(DATASET_PATH, z), listdir(DATASET_PATH))
     )
     for fd in abs_file_path:
         try:
-            x =  imresize(
+            x = imresize(
                 imread(fd),
                 RES
             )
-            yield x,fd
-        except OSError as err:
-            #pass errors for reading nonimage files
+            yield x, fd
+        except OSError:
+            # pass errors for reading non image files
             pass
 
 
-def load_groundtruths(num=500):
+def _load_ground_truths():
     abs_file_path = map(
-        lambda x: os.path.join(GROUND_TRUTH, x),
-        os.listdir(GROUND_TRUTH)
+        lambda z: path.join(GROUND_TRUTH, z),
+        listdir(GROUND_TRUTH)
     )
     p = sorted(abs_file_path)
-    for fd in p :
+    for fd in p:
         try:
-            #load matlib file
+            # load mat lib file
             x = loadmat(fd)
-            yield x, fd
-        except OSError as identifier:
-            #pass errors for non image files 
+            yield (handle_mat_struct(x), fd)
+        except OSError and ValueError:
+            # pass errors for non image files
             pass
 
-def request_data():
-    for img,truth in zip(load_testset(), load_groundtruths()):
-        yield img[0], truth[0]
 
-# test that loaded goundtruth has its corresponding  test file loaded correctly 
-for (i,i_fd), (j, j_fd) in zip(load_testset(), load_groundtruths()):
-    # print(i, j)
-    # print("1")
-    getfname = lambda x: os.path.split(x)[1].split(".")[0]
-    assert getfname(i_fd) == getfname(j_fd)
+def request_data():
+    for img, truth in zip(_load_test_set(), _load_ground_truths()):
+        assert get_fname(img[1]) == get_fname(truth[1])
+        yield img[0], truth[0]  # only return files index = 0 pass on filename
+
+
+# test that loaded ground truth has its corresponding  test file loaded correctly
+# for (i,i_fd), (j, j_fd) in zip(_load_test_set(), _load_ground_truths()):
+#     # print(i, j
+#     # print("1")
+#     get_fname = lambda x: os.path.split(x)[1].split(".")[0]
+#     assert get_fname(i_fd) == get_fname(j_fd)
+
+
+get_fname = lambda x: path.split(x)[1].split(".")[0]
+
+if __name__ == "__main__":
+    image, gt_iter = next(request_data())
+    gt_e = next(gt_iter)
+    print(gt_e['Boundaries'][0])
