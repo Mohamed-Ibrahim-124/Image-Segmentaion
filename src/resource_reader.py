@@ -1,13 +1,13 @@
 from os import path, getcwd, listdir
 from scipy.misc import imread, imresize
 from scipy.io import loadmat
-from src.misc import handle_mat_struct
+from misc import handle_mat_struct
 
 # down resizing to accelerate computation
 RES = (500, 500)
 
 DATASET_PATH = path.join(
-    getcwd(),
+    path.split(getcwd())[0],
     "BSR",
     "BSDS500",
     "data",
@@ -16,7 +16,7 @@ DATASET_PATH = path.join(
 )
 
 GROUND_TRUTH = path.join(
-    getcwd(),
+    path.split(getcwd())[0],
     "BSR",
     "BSDS500",
     "data",
@@ -76,4 +76,4 @@ get_fname = lambda x: path.split(x)[1].split(".")[0]
 if __name__ == "__main__":
     image, gt_iter = next(request_data())
     gt_e = next(gt_iter)
-    print(gt_e['Boundaries'][0])
+    print(gt_e[0])
