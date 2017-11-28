@@ -16,12 +16,14 @@ def handle_mat_struct(matobject):
 
 def construct_knn_graph(adj_matrix, n=5):
     for row, row_num in zip(adj_matrix, range(adj_matrix.shape[0])):
-        max_indx_n = np.argsort(row)[:n]
+        max_indx_n = np.argsort(row)[-n:]
         assert len(max_indx_n) == n
         assert len(row) > 1
         for i in range(len(row)):
             adj_matrix[row_num, i] = 0 if i not in max_indx_n else 1
     return adj_matrix
+
+
 
 if __name__ =="__main__":
     #TODO test adjacency and knn graph construction 
