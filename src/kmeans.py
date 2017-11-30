@@ -196,7 +196,7 @@ def kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func=euclidea
 if __name__ == '__main__':
     os.environ['MKL_DYNAMIC'] = 'false'
     from scipy.misc import imshow
-    from src import resource_reader as rr
+    import resource_reader as rr
     train_image = next(rr.request_data())[0]
     image_shape = train_image.shape
     train_image = train_image.reshape((train_image.shape[0] * train_image.shape[1], 3))
