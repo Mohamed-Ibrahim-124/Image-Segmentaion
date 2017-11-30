@@ -1,3 +1,4 @@
+import os
 from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
 from random import sample
@@ -113,7 +114,7 @@ def compute_cost(data, assignments, centroids):
     return cost / centroids.shape[0]
 
 
-def kmeans(data, threshold=0.01, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
+def _kmeans(data, threshold=0.01, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
     """
     Compute k-means clustering on given data samples
 
@@ -156,7 +157,7 @@ def kmeans(data, threshold=0.01, k=2, max_iters=100, distance_func=euclidean_dis
     return centroids, assignments
 
 
-def evaluate_kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
+def kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
     """
     Run Kmeans clustering on given data samples multiple times(num_eval) and report result with min cost
 
@@ -177,11 +178,12 @@ def evaluate_kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func
     :return: centroids, samples assignments corresponding to the least cost
     :rtype: numpy matrix, shape(k_clusters, n_features), numpy matrix, shape(n_samples, 1)
     """
+    data = np.nan_to_num(data)
     cost = 0
     best_centroids = best_assignments = None
     for i in range(num_eval):
         # computing kmeans on the given data samples
-        centers, assignments = kmeans(data, threshold, k, max_iters, distance_func, centroids)
+        centers, assignments = _kmeans(data, threshold, k, max_iters, distance_func, centroids)
         # computing cost function
         temp_cost = compute_cost(data, assignments, centers)
         if temp_cost < cost or i == 0:
@@ -192,12 +194,13 @@ def evaluate_kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func
 
 
 if __name__ == '__main__':
+    os.environ['MKL_DYNAMIC'] = 'false'
     from scipy.misc import imshow
     from src import resource_reader as rr
     train_image = next(rr.request_data())[0]
     image_shape = train_image.shape
     train_image = train_image.reshape((train_image.shape[0] * train_image.shape[1], 3))
     k_clusters = 5
-    best = evaluate_kmeans(train_image, 5, 0.0001, k_clusters)
+    best = kmeans(train_image, 5, 0.01, k_clusters)
     image2 = draw_clusters(best[1], k_clusters, image_shape, best[0])
     imshow(image2)
