@@ -1,30 +1,27 @@
-from src import resource_reader
+from src import resource_reader as rr
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import numpy as np
-
-# train_image = next(rr.request_data())[0]
-# train_image = imresize(train_image, (100, 100))
 
 
+def visualize_data(image, groundtruth, name):
 
-
-
-
-for image, ground_truth,name in resource_reader.request_data():
-    fig = plt.figure()
-    a = fig.add_subplot(1, 6, 1)
-    plt.imshow(image)
-    a.set_title(name)
-    a.axis('off')
-    i = 2
-    for segmentation, boundaries in ground_truth:
-        a = fig.add_subplot(1, 6, i)
-        imgplot = plt.imshow(boundaries, cmap='Greys')
+        fig = plt.figure()
+        a = fig.add_subplot(1, 6, 1)
+        plt.imshow(image)
+        a.set_title(name)
         a.axis('off')
-        a = fig.add_subplot(2, 6, i)
-        imgplot = plt.imshow(segmentation)
-        a.set_title('bound'+str(i-1))
-        i = i+1
-        a.axis('off')
-    plt.show()
+        i = 2
+        for segmentation, boundaries in groundtruth:
+            a = fig.add_subplot(1, 6, i)
+            plt.imshow(boundaries, cmap='Greys')
+            a.axis('off')
+            a = fig.add_subplot(2, 6, i)
+            plt.imshow(segmentation)
+            a.set_title('bound'+str(i-1))
+            i = i+1
+            a.axis('off')
+        plt.show()
+
+
+if __name__ == '__main__':
+    img, gtruth, s = next(rr.request_data())
+    visualize_data(image=img, groundtruth=gtruth, name=s)
