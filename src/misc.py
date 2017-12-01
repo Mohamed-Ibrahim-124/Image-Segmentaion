@@ -13,8 +13,10 @@ def handle_mat_struct(matobject):
     for i in matobject['groundTruth'][0]:
         yield (
             imresize(i[0][SEGMENTATION][0], RES),
-            i[0][BOUNDARIES][0]
+            imresize(i[0][BOUNDARIES][0], RES)
             )
+
+
 
 
 

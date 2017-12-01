@@ -4,7 +4,7 @@ from scipy.io import loadmat
 from misc import handle_mat_struct
 
 # down resizing to accelerate computation
-RES = (500, 500)
+RES = (30, 30)
 
 DATASET_PATH = path.join(
     path.split(getcwd())[0],
@@ -60,7 +60,7 @@ def _load_ground_truths():
 def request_data():
     for img, truth in zip(_load_test_set(), _load_ground_truths()):
         assert get_fname(img[1]) == get_fname(truth[1])
-        yield img[0], truth[0]  # only return files index = 0 pass on filename
+        yield (img[0], truth[0], get_fname(img[1]))  # only return files index = 0 pass on filename
 
 
 # test that loaded ground truth has its corresponding  test file loaded correctly
@@ -74,6 +74,8 @@ def request_data():
 get_fname = lambda x: path.split(x)[1].split(".")[0]
 
 if __name__ == "__main__":
-    image, gt_iter = next(request_data())
+    image, gt_iter, fname = next(request_data())
     gt_e = next(gt_iter)
-    print(gt_e[0])
+    assert gt_e[0].shape == RES
+    assert gt_e[1].shape == RES
+    print(fname)
