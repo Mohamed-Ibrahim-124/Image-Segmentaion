@@ -4,7 +4,7 @@ from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.csgraph import laplacian
 from sklearn.metrics.pairwise import rbf_kernel
 from src.kmeans import kmeans, draw_clusters
-
+import matplotlib.pyplot as plt
 
 def knn(data, neighbours):
     return kneighbors_graph(data, neighbours).todense()
@@ -45,11 +45,13 @@ def spectral_clustering(data, k, sim_func, sim_arg=None, sim_mat=None):
         # sim_mat = np.asmatrix(np.load('rbf_sim_mat.npy'))
     # Computing laplacian matrix
     laplace_matrix = laplacian(sim_mat, normed=False)
+    del(sim_mat)
     # computing eigen values and  vectors
-    eig_values, eig_vectors = np.linalg.eigh(laplace_matrix)
-    # eig_vectors = np.asmatrix(np.load('eig_vec.npy'))
+    eig_vectors = np.linalg.eigh(laplace_matrix)[1]
+    del(laplace_matrix)
     # Normalizing each row
     normalized_data = normalize_rows(eig_vectors[:, :k])
+    del(eig_vectors)
     return kmeans(np.ma.array(normalized_data, mask=np.isnan(normalized_data)), 5, 0.0001, k=k)
 
 
@@ -66,4 +68,6 @@ if __name__ == '__main__':
     k_clusters = 5
     centers, assigns= spectral_clustering(np.asmatrix(train_image), k_clusters, rbf, 10)
     image2 = draw_clusters(assigns, k_clusters, image_shape)
-    imshow(image2)
+    # imshow(image2)
+    plt.imshow(image2)
+    plt.show()
