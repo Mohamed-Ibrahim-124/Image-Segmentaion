@@ -3,16 +3,20 @@ from os import path
 from scipy.io import loadmat
 from scipy.misc import imresize
 import logging
+
 # logging.basicConfig("misc.py", level=logging.DEBUG)
 def handle_mat_struct(matobject):
+    from resource_reader import RES
     SEGMENTATION = 'Segmentation'
     BOUNDARIES = 'Boundaries'
 
     for i in matobject['groundTruth'][0]:
         yield (
-            i[0][SEGMENTATION][0],
+            imresize(i[0][SEGMENTATION][0], RES),
             i[0][BOUNDARIES][0]
             )
+
+
 
 def construct_knn_graph(adj_matrix, n=5):
     for row, row_num in zip(adj_matrix, range(adj_matrix.shape[0])):
@@ -23,6 +27,11 @@ def construct_knn_graph(adj_matrix, n=5):
             adj_matrix[row_num, i] = 0 if i not in max_indx_n else 1
     return adj_matrix
 
+def compute_degree_matrix(adj_matrix):
+    degree_matrix = np.zeros((adj_matrix.shape))
+    for i,row in zip(range(adj_matrix.shape[0]), adj_matrix):
+        degree_matrix[i,i] = sum(row)
+    return degree_matrix
 
 
 if __name__ =="__main__":
@@ -38,5 +47,5 @@ if __name__ =="__main__":
         rbf_kernel(data, gamma=1).shape
     )
     print(
-        construct_knn_graph(rbf_kernel(data, gamma=1))
+        construct_knn_graph(rbf_kernel(data))
     )
