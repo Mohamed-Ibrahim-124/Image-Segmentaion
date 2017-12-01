@@ -157,7 +157,7 @@ def _kmeans(data, threshold=0.01, k=2, max_iters=100, distance_func=euclidean_di
     return centroids, assignments
 
 
-def kmeans(data, num_eval, threshold, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
+def kmeans(data, num_eval=5, threshold=0.01, k=2, max_iters=100, distance_func=euclidean_distances, centroids=None):
     """
     Run Kmeans clustering on given data samples multiple times(num_eval) and report result with min cost
 
