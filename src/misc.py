@@ -16,10 +16,6 @@ def handle_mat_struct(matobject):
             imresize(i[0][BOUNDARIES][0], RES)
             )
 
-
-
-
-
 def construct_knn_graph(adj_matrix, n=5):
     for row, row_num in zip(adj_matrix, range(adj_matrix.shape[0])):
         max_indx_n = np.argsort(row)[-n:]
@@ -29,6 +25,21 @@ def construct_knn_graph(adj_matrix, n=5):
             adj_matrix[row_num, i] = 0 if i not in max_indx_n else 1
     return adj_matrix
 
+def construct_knn_graph_spatial_layout(sim_matrix, spatial_nearest_neighbours=24, n=5):
+    from scipy.spatial import KDTree
+    from resource_reader import RES
+    x,y = np.mgrid[0:RES[0], 0:RES[1]]
+    tree = KDTree(list(zip(
+        x.ravel(),
+        y.ravel()
+    )))
+    assert tree.data.shape[0] == RES[0] * RES[1]
+    _, knn_indices = tree.query(tree.data, k=spatial_nearest_neighbours)
+    for row, row_num in zip(sim_matrix, range(sim_matrix.shape[0])):
+        for i in range(len(row)):
+            if i not in knn_indices[row_num] : sim_matrix[row_num, i] = 0
+    return construct_knn_graph(sim_matrix, n=5)
+
 def compute_degree_matrix(adj_matrix):
     degree_matrix = np.zeros((adj_matrix.shape))
     for i,row in zip(range(adj_matrix.shape[0]), adj_matrix):
@@ -37,6 +48,7 @@ def compute_degree_matrix(adj_matrix):
 
 
 if __name__ =="__main__":
+# if True:
     #TODO test adjacency and knn graph construction 
     rbf = lambda x,y,g : np.exp(-1 * np.abs(x-y)**2 / (2 * g**2))
     from resource_reader import request_data
@@ -49,5 +61,5 @@ if __name__ =="__main__":
         rbf_kernel(data, gamma=1).shape
     )
     print(
-        construct_knn_graph(rbf_kernel(data))
+        construct_knn_graph_spatial_layout(rbf_kernel(data))
     )
