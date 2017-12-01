@@ -36,8 +36,8 @@ def conditional_entropy(data, ground_truth):
             prob = elements_counter[partition] / np.size(cluster_elements)
             # print(prob)
             cluster_entropy -= prob * np.log2(prob) if prob != 0 else 0
-            assert np.isnan(prob) is False
-            assert np.isnan(cluster_entropy) is False
+            assert np.isnan(prob) == False
+            assert np.isnan(cluster_entropy) == False
         total_entropy += cluster_entropy * cluster_elements.size 
     return total_entropy / data.size
 
