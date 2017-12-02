@@ -47,6 +47,14 @@ def compute_degree_matrix(adj_matrix):
     return degree_matrix
 
 
+def add_spatial(data):
+    spatial_data = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2))
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            spatial_data[i, j] = np.hstack((data[i, j], np.asarray([i, j])))
+    return spatial_data
+
+
 if __name__ =="__main__":
 # if True:
     #TODO test adjacency and knn graph construction 
