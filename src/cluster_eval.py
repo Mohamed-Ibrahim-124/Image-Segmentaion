@@ -97,7 +97,7 @@ def _evaluate_spectral(dir, data, ground_truth, name, resolution, k_clusters, si
         entropies = np.asarray(entropies)
         np.savetxt(eval_file, np.vstack((f_measures, entropies)))
         return assigns, (f_measures, entropies)
-    return read_kmeans_eval(name, k_clusters, resolution)
+    return read_spectral_eval(name, k_clusters, resolution, sim_func, sim_arg)
 
 
 def evaluate_kmeans(dir, k_clusters, recompute=False):
@@ -187,7 +187,7 @@ def read_spectral_eval(name, k, resolution, sim_func, sim_arg):
     :return: assignments, (f_measure, conditional_entropies)
     :rtype: nd-array, (nd-array, nd-array)
     """
-    dir = path.join(SPECTRAL_DIR, str(k), str(sim_func).split([1]), str(sim_arg))
+    dir = path.join(SPECTRAL_DIR, str(k), str(sim_func).split()[1], str(sim_arg))
     name = str(name).split('.')[0] + '_' + str(resolution)
     assert path.exists(path.join(dir, name + '.npy')), 'Assignments file is missing or not found'
     assert path.exists(path.join(dir, name + '.eval')), 'Evaluation file is missing or not found'
