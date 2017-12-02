@@ -4,7 +4,7 @@ from src.spectral_clustering import spectral_clustering, rbf, knn
 from src.eval import fmeasure, conditional_entropy
 import numpy as np
 from os import path, makedirs, environ
-
+from itertools import islice
 
 KMEANS_DIR = "../kmeans_eval"
 SPECTRAL_DIR = "../spectral_eval"
@@ -50,7 +50,7 @@ def _evaluate_kmeans(dir, data, ground_truth, name, resolution, k_clusters, reco
         entropies = np.asarray(entropies)
         np.savetxt(eval_file, np.vstack((f_measures, entropies)))
         return assigns, (f_measures, entropies)
-    return read_kmeans_eval(k_clusters, name, resolution)
+    return read_kmeans_eval(name, k_clusters, resolution)
 
 
 def _evaluate_spectral(dir, data, ground_truth, name, resolution, k_clusters, sim_func, sim_arg, recompute=False):
@@ -97,7 +97,7 @@ def _evaluate_spectral(dir, data, ground_truth, name, resolution, k_clusters, si
         entropies = np.asarray(entropies)
         np.savetxt(eval_file, np.vstack((f_measures, entropies)))
         return assigns, (f_measures, entropies)
-    return read_kmeans_eval(k_clusters, name, resolution)
+    return read_kmeans_eval(name, k_clusters, resolution)
 
 
 def evaluate_kmeans(dir, k_clusters, recompute=False):
@@ -114,7 +114,7 @@ def evaluate_kmeans(dir, k_clusters, recompute=False):
     dir = path.join(dir, str(k_clusters))
     if not path.exists(dir):
         makedirs(dir)
-    for image, ground_truth, name in reader.request_data():
+    for image, ground_truth, name in islice(reader.request_data(), 100):
         _evaluate_kmeans(dir, image.reshape(image.shape[0] * image.shape[1], image.shape[2]), ground_truth, name,
                          image.shape[0], k_clusters, recompute)
 
@@ -137,7 +137,7 @@ def evaluate_spectral(dir, k_clusters, sim_func, sim_arg, recompute=False):
     dir = path.join(dir, str(k_clusters), str(sim_func).split()[1], str(sim_arg))
     if not path.exists(dir):
         makedirs(dir)
-    for image, ground_truth, name in reader.request_data():
+    for image, ground_truth, name in islice(reader.request_data(), 100):
         _evaluate_spectral(dir, image.reshape(image.shape[0] * image.shape[1], image.shape[2]), ground_truth, name,
                            image.shape[0], k_clusters, sim_func, sim_arg, recompute)
 
@@ -154,12 +154,12 @@ def load_eval_data(path):
     return temp[0, :], temp[1, :]
 
 
-def read_kmeans_eval(k, name, resolution):
+def read_kmeans_eval(name, k, resolution):
     """
-    :param k: number of clusters
-    :type k: int
     :param name: image name
     :type name: str
+    :param k: number of clusters
+    :type k: int
     :param resolution: resolution of the image to load evaluation for.
     :type resolution: int
     :return: assignments, (f_measure, conditional_entropies)
@@ -172,12 +172,12 @@ def read_kmeans_eval(k, name, resolution):
     return np.load(path.join(dir, name + '.npy')), load_eval_data(path.join(dir, name + '.eval'))
 
 
-def read_spectral_eval(k, name, resolution, sim_func, sim_arg):
+def read_spectral_eval(name, k, resolution, sim_func, sim_arg):
     """
-    :param k: number of clusters
-    :type k: int
     :param name: image name
     :type name: str
+    :param k: number of clusters
+    :type k: int
     :param resolution: resolution of the image to load evaluation for.
     :type resolution: int
     :param sim_func: can be rbf or knn
@@ -197,8 +197,8 @@ def read_spectral_eval(k, name, resolution, sim_func, sim_arg):
 if __name__ == '__main__':
     environ['MKL_DYNAMIC'] = 'false'
     for k in [3, 5, 7, 9, 11]:
-        # evaluate_kmeans(KMEANS_DIR, k)
-        for gamma in [1, 10]:
-            evaluate_spectral(SPECTRAL_DIR, k, rbf, gamma)
-        for n_neighbours in [3, 5]:
-            evaluate_spectral(SPECTRAL_DIR, k, knn, n_neighbours)
+        evaluate_kmeans(KMEANS_DIR, k)
+        # for gamma in [1, 10]:
+        #     evaluate_spectral(SPECTRAL_DIR, k, rbf, gamma)
+        # for n_neighbours in [5]:
+        #     evaluate_spectral(SPECTRAL_DIR, k, knn, n_neighbours)
