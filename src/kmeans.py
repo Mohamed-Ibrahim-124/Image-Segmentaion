@@ -81,10 +81,10 @@ def draw_clusters(assignments, k, shape, colors=None):
     if colors is None:
         rang = range(0, 255, int(255 / k))
         colors = [[i, j, l] for i, j, l in zip(sample(rang, k), sample(rang, k), sample(rang, k))]
-    image = np.zeros((shape[0], shape[1], shape[2]))
+    image = np.zeros((shape[0], shape[1], 3))
     for m in range(shape[0]):
         for n in range(shape[1]):
-            image[m, n] = colors[assignments[m * shape[1] + n]]
+            image[m, n] = colors[assignments[m * shape[1] + n]][:3]
     return image
 
 
@@ -196,11 +196,19 @@ def kmeans(data, num_eval=5, threshold=0.01, k=2, max_iters=100, distance_func=e
 if __name__ == '__main__':
     os.environ['MKL_DYNAMIC'] = 'false'
     from scipy.misc import imshow
-    import resource_reader as rr
+    import src.resource_reader as rr
+    from src.misc import add_spatial
     train_image = next(rr.request_data())[0]
+    spatial_image = add_spatial(train_image)
     image_shape = train_image.shape
-    train_image = train_image.reshape((train_image.shape[0] * train_image.shape[1], 3))
-    k_clusters = 5
+    train_image = train_image.reshape((image_shape[0] * image_shape[1], image_shape[2]))
+    k_clusters = 11
     best = kmeans(train_image, 5, 0.01, k_clusters)
-    image2 = draw_clusters(best[1], k_clusters, image_shape, best[0])
+    image2 = draw_clusters(best[1], k_clusters, image_shape)
+    imshow(image2)
+    '''################ including spatial ###############'''
+    spatial_image_shape = spatial_image.shape
+    spatial_image = spatial_image.reshape((spatial_image_shape[0] * spatial_image_shape[1], spatial_image_shape[2]))
+    best = kmeans(spatial_image, 5, 0.01, k_clusters)
+    image2 = draw_clusters(best[1], k_clusters, spatial_image_shape)
     imshow(image2)
