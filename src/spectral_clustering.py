@@ -74,14 +74,19 @@ def rbf(data, gamma):
 
 
 if __name__ == '__main__':
-    os.environ['MKL_DYNAMIC'] = 'false'
+    # os.environ['MKL_DYNAMIC'] = 'false'
     from scipy.misc import imread, imshow, imresize
+    from src.misc import construct_knn_graph_spatial_layout
     train_image = imresize(imread('../BSR/bench/data/images/8068.jpg'), (100, 100))
     image_shape = train_image.shape
     train_image = train_image.reshape((train_image.shape[0] * train_image.shape[1], train_image.shape[2]))
     k_clusters = 5
-    centers, assigns= spectral_clustering(np.asmatrix(train_image), k_clusters, rbf, 10)
-    image2 = draw_clusters(assigns, k_clusters, image_shape)
-    # imshow(image2)
-    plt.imshow(image2)
-    plt.show()
+    rbf_sim=rbf(np.asmatrix(train_image),10)
+    for i in[3,5,7,9,11]:
+        sim=construct_knn_graph_spatial_layout((rbf_sim))
+        centers, assigns= spectral_clustering(data=None, sim_mat=sim, k=i, sim_func=None, sim_arg=None)
+        image2 = draw_clusters(assigns, k_clusters, image_shape)
+        # imshow(image2)
+        print(i)
+        plt.imshow(image2)
+        plt.show()
