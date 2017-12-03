@@ -48,10 +48,12 @@ def compute_degree_matrix(adj_matrix):
 
 
 def add_spatial(data):
+    assert len(data.shape) == 3
     spatial_data = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2))
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
-            spatial_data[i, j] = np.hstack((data[i, j], np.asarray([i, j])))
+            feature_vector = np.hstack((data[i, j], np.asarray([i, j])))
+            spatial_data[i, j] = feature_vector / np.linalg.norm(feature_vector, axis=0)
     return spatial_data
 
 

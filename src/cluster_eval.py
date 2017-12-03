@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 import resource_reader as reader
 from kmeans import kmeans
 from spectral_clustering import spectral_clustering, rbf, knn
 from eval import fmeasure, conditional_entropy
+=======
+import src.resource_reader as reader
+from src.kmeans import kmeans, draw_clusters
+from src.spectral_clustering import spectral_clustering, rbf, knn
+from src.eval import fmeasure, conditional_entropy
+>>>>>>> bde5327d1297ce2558ae5b1520d7595fecf87902
 import numpy as np
 from os import path, makedirs, environ
 from itertools import islice
+from scipy.misc import imshow, imread, imresize
 
 KMEANS_DIR = "../kmeans_eval"
 SPECTRAL_DIR = "../spectral_eval"
@@ -28,8 +36,6 @@ def _evaluate_kmeans(dir, data, ground_truth, name, resolution, k_clusters, reco
     :type k_clusters: int
     :param recompute: force compute assignments and evaluation files even if they already exist.
     :type recompute: bool
-    :return: assignments, (f_measure, conditional_entropies)
-    :rtype: nd-array, (nd-array, nd-array)
     """
     assert path.exists(dir), 'Given directory is not found'
     assigns_file = path.join(dir, name) + '_' + str(resolution) + '.npy'
@@ -49,8 +55,6 @@ def _evaluate_kmeans(dir, data, ground_truth, name, resolution, k_clusters, reco
         f_measures = np.asarray(f_measures)
         entropies = np.asarray(entropies)
         np.savetxt(eval_file, np.vstack((f_measures, entropies)))
-        return assigns, (f_measures, entropies)
-    return read_kmeans_eval(name, k_clusters, resolution)
 
 
 def _evaluate_spectral(dir, data, ground_truth, name, resolution, k_clusters, sim_func, sim_arg, recompute=False):
@@ -75,8 +79,6 @@ def _evaluate_spectral(dir, data, ground_truth, name, resolution, k_clusters, si
     :type sim_arg: float for gamma, int for n_neighbours
     :param recompute: force compute assignments and evaluation files even if they already exist.
     :type recompute: bool
-    :return: assignments, (f_measure, conditional_entropies)
-    :rtype: nd-array, (nd-array, nd-array)
     """
     assert path.exists(dir), 'Given directory is not found'
     assigns_file = path.join(dir, name) + '_' + str(resolution) + '.npy'
@@ -96,8 +98,6 @@ def _evaluate_spectral(dir, data, ground_truth, name, resolution, k_clusters, si
         f_measures = np.asarray(f_measures)
         entropies = np.asarray(entropies)
         np.savetxt(eval_file, np.vstack((f_measures, entropies)))
-        return assigns, (f_measures, entropies)
-    return read_spectral_eval(name, k_clusters, resolution, sim_func, sim_arg)
 
 
 def evaluate_kmeans(dir, k_clusters, recompute=False):
@@ -137,7 +137,11 @@ def evaluate_spectral(dir, k_clusters, sim_func, sim_arg, recompute=False):
     dir = path.join(dir, str(k_clusters), str(sim_func).split()[1], str(sim_arg))
     if not path.exists(dir):
         makedirs(dir)
+<<<<<<< HEAD
     for image, ground_truth, name in islice(reader.request_data(), 0,30):
+=======
+    for image, ground_truth, name in islice(reader.request_data(), 30):
+>>>>>>> bde5327d1297ce2558ae5b1520d7595fecf87902
         _evaluate_spectral(dir, image.reshape(image.shape[0] * image.shape[1], image.shape[2]), ground_truth, name,
                            image.shape[0], k_clusters, sim_func, sim_arg, recompute)
 
@@ -212,11 +216,48 @@ def big_picture_eval():
             spectral_clustering(img, k=5, knn, 5)
         )
 
+def avg_eval(path):
+    f_measures, entropies = load_eval_data(path)
+    return np.sum(f_measures) / f_measures.size, np.sum(entropies) / entropies.size
+
+
+def avg_kmeans_eval(name, k, resolution):
+    f_measures, entropies = read_kmeans_eval(name, k, resolution)[1]
+    return np.sum(f_measures) / f_measures.size, np.sum(entropies) / entropies.size
+
+
+def avg_spectral_eval(name, k, resolution, sim_func, sim_arg):
+    f_measures, entropies = read_spectral_eval(name, k, resolution, sim_func, sim_arg)[1]
+    return np.sum(f_measures) / f_measures.size, np.sum(entropies) / entropies.size
+
+
+def total_avg_kmeans(name, resolution):
+    f_sum = entropy_sum = f_length = entropy_length =0
+    for k in [3, 5, 7, 9, 11]:
+        f_measures, entropies = read_kmeans_eval(name, k, resolution)[1]
+        f_sum += np.sum(f_measures)
+        entropy_sum += np.sum(entropies)
+        f_length += f_measures.size
+        entropy_length += entropies.size
+    return f_sum / f_length, entropy_sum / entropy_length
+
+
+def total_avg_spectral(name, resolution, sim_func, sim_arg):
+    f_sum = entropy_sum = f_length = entropy_length = 0
+    for k in [3, 5, 7, 9, 11]:
+        f_measures, entropies = read_spectral_eval(name, k, resolution, sim_func, sim_arg)[1]
+        f_sum += np.sum(f_measures)
+        entropy_sum += np.sum(entropies)
+        f_length += f_measures.size
+        entropy_length += entropies.size
+    return f_sum / f_length, entropy_sum / entropy_length
+
+
 if __name__ == '__main__':
     environ['MKL_DYNAMIC'] = 'false'
-    for k in [7, 9]:
-        # evaluate_kmeans(KMEANS_DIR, k)
-        # for gamma in [1, 10]:
-        #     evaluate_spectral(SPECTRAL_DIR, k, rbf, gamma)
+    for k in [3, 5, 7, 9, 11]:
+        evaluate_kmeans(KMEANS_DIR, k)
+        for gamma in [1, 10]:
+            evaluate_spectral(SPECTRAL_DIR, k, rbf, gamma)
         for n_neighbours in [5]:
             evaluate_spectral(SPECTRAL_DIR, k, knn, n_neighbours)
