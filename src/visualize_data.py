@@ -32,15 +32,15 @@ def visualize_data(image, groundtruth, name,fignum=None):
             #         a.set_title('bound'+str(i-1))
             #         i = i+1
             #         a.axis('off')
-        plt.show()
+        plt.savefig(fname=name)
 
 
-def show_images(images):
+def show_images(images,name):
     fig, axis = plt.subplots(2)
     for img, ax in zip(images, axis):
         ax.imshow(img)
 # fig.show()
-    plt.show()
+    plt.savefig(fname=str(name))
 
 if __name__ == '__main__':
     img, gtruth, s = next(rr.request_data())
