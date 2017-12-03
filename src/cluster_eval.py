@@ -1,7 +1,7 @@
-import src.resource_reader as reader
-from src.kmeans import kmeans, draw_clusters
-from src.spectral_clustering import _spectral_clustering, rbf, knn, normalize
-from src.eval import fmeasure, conditional_entropy
+import resource_reader as reader
+from kmeans import kmeans, draw_clusters
+from spectral_clustering import _spectral_clustering, rbf, knn, normalize
+from eval import fmeasure, conditional_entropy
 import numpy as np
 from os import path, makedirs, environ
 from itertools import islice, tee
@@ -193,31 +193,44 @@ def read_spectral_eval(name, k, resolution, sim_func, sim_arg):
     return np.load(path.join(dir, name + '.npy')), load_eval_data(path.join(dir, name + '.eval'))
 
 
-# def big_picture_eval():
-#     from src.visualize_data import visualize_data
-#     from itertools import islice
-#     from src.spectral_clustering import knn
-#     for img, gt_iter, fname in islice(reader.request_data(), 5):
-#         shape = img.shape
-#         img = img.reshape((shape[0] * shape[1], shape[2]))
-#         kmeans_ouput = kmeans(img, k=5)
-#         visualize_data(kmeans_ouput[1].reshape((shape[0], shape[1])), gt_iter, fname)
-#     for img, gt_iter, fname in islice(reader.request_data(), 5):
-#         shape = img.shape
-#         img = img.reshape((shape[0] * shape[1], shape[2]))
-#         visualize_data(
-#             spectral_clustering(img, k=5)[1].reshape((shape[0], shape[1])),
-#             gt_iter,
-#             fname
-#         )
-#     for img, gt_iter,fname in islice(reader.request_data(), 5):
-#         shape = img.shape
-#         img = img.reshape((shape[0] * shape[1], shape[2]))
-#         visualize_data(
-#             kmeans(img, k=5)[1].reshape((shape[0], shape[1])),
-#             spectral_clustering(img, 5, knn, 5)[1]
-#         )
+def big_picture_eval():
+    from visualize_data import show_images, visualize_data
+    from itertools import islice, chain
+    from spectral_clustering import knn, spectral_clustering
+    img_pre_reshape = lambda img : img.reshape(img.shape[0] * img.shape[1], img.shape[2])
+    img_original = lambda img : img.reshape(reader.RES[0], reader.RES[1])
+    
+    for img, gt_iter, fname in islice(reader.request_data(), 5):
+        print(0)
+        output = kmeans(img_pre_reshape(img), k=5)[1]
+        visualize_data(
+            img_original(output),
+            gt_iter, 
+            fname
+        )
 
+    for img, gt_iter, fname in islice(reader.request_data(), 5):
+        print(1)
+        spectral_output = spectral_clustering(
+            img_pre_reshape(img),
+            k=5,
+            sim_func=knn,
+            sim_arg=5)[1]
+        visualize_data(
+            img_original(spectral_output),
+            gt_iter,
+            fname
+        )
+
+    for img, gt_iter,fname in islice(reader.request_data(), 5):
+        print(2)
+        spectral_output = spectral_clustering(
+            img_pre_reshape(img),
+            k=5,
+            sim_func=knn,
+            sim_arg=5)[1]
+        kmeans_output = kmeans(img_pre_reshape(img), k=5)[1]
+        show_images([img_original(kmeans_output),img_original(spectral_output)])
 
 def avg_eval(path):
     f_measures, entropies = load_eval_data(path)
@@ -257,14 +270,15 @@ def total_avg_spectral(name, resolution, sim_func, sim_arg):
 
 
 if __name__ == '__main__':
-    environ['MKL_DYNAMIC'] = 'false'
-    counter = 0
-    for k in [3, 5, 7, 9, 11]:
-        evaluate_kmeans(KMEANS_DIR, k)
-    evaluate_spectral(SPECTRAL_DIR, [3, 5, 7, 9, 11], rbf, [1, 10])
-    evaluate_spectral(SPECTRAL_DIR, [3, 5, 7, 9, 11], knn, [5])
-    for k in [3, 5, 7, 9, 11]:
-        x = read_spectral_eval('100039', k, 100, rbf, 10)
-        imshow(imresize(draw_clusters(x[0], k, (100, 100)), (500, 500)))
-        print(x[1])
-        print(avg_spectral_eval('100039', k, 100, rbf, 10))
+    # environ['MKL_DYNAMIC'] = 'false'
+    # counter = 0
+    # for k in [3, 5, 7, 9, 11]:
+    #     evaluate_kmeans(KMEANS_DIR, k)
+    # evaluate_spectral(SPECTRAL_DIR, [3, 5, 7, 9, 11], rbf, [1, 10])
+    # evaluate_spectral(SPECTRAL_DIR, [3, 5, 7, 9, 11], knn, [5])
+    # for k in [3, 5, 7, 9, 11]:
+    #     x = read_spectral_eval('100039', k, 100, rbf, 10)
+    #     imshow(imresize(draw_clusters(x[0], k, (100, 100)), (500, 500)))
+    #     print(x[1])
+    #     print(avg_spectral_eval('100039', k, 100, rbf, 10))
+    big_picture_eval()

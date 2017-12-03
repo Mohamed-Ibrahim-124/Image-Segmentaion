@@ -21,17 +21,23 @@ def visualize_data(image, groundtruth, name):
                 i = i+1
                 a.axis('off')
         except TypeError as err:
-            for segmentation in groundtruth:
-                a = fig.add_subplot(1, 6, i)
-                    plt.imshow(boundaries, cmap='Greys')
-                    a.axis('off')
-                    a = fig.add_subplot(2, 6, i)
-                    plt.imshow(segmentation)
-                    a.set_title('bound'+str(i-1))
-                    i = i+1
-                    a.axis('off')
+            pass
+            
+            # for segmentation in groundtruth:
+            #     a = fig.add_subplot(1, 6, i)
+            #         plt.imshow(boundaries, cmap='Greys')
+            #         a.axis('off')
+            #         a = fig.add_subplot(2, 6, i)
+            #         plt.imshow(segmentation)
+            #         a.set_title('bound'+str(i-1))
+            #         i = i+1
+            #         a.axis('off')
         plt.show()
-
+def show_images(images):
+    fig, axis = plt.subplots(5)
+    for img, ax in zip(images,axis):
+        ax.imshow(img)
+    fig.show()
 
 if __name__ == '__main__':
     img, gtruth, s = next(rr.request_data())
