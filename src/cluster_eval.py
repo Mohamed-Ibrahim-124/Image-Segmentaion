@@ -1,7 +1,7 @@
-import src.resource_reader as reader
-from src.kmeans import kmeans
-from src.spectral_clustering import spectral_clustering, rbf, knn
-from src.eval import fmeasure, conditional_entropy
+import resource_reader as reader
+from kmeans import kmeans
+from spectral_clustering import spectral_clustering, rbf, knn
+from eval import fmeasure, conditional_entropy
 import numpy as np
 from os import path, makedirs, environ
 from itertools import islice
@@ -137,7 +137,7 @@ def evaluate_spectral(dir, k_clusters, sim_func, sim_arg, recompute=False):
     dir = path.join(dir, str(k_clusters), str(sim_func).split()[1], str(sim_arg))
     if not path.exists(dir):
         makedirs(dir)
-    for image, ground_truth, name in islice(reader.request_data(), 100):
+    for image, ground_truth, name in islice(reader.request_data(), 0,30):
         _evaluate_spectral(dir, image.reshape(image.shape[0] * image.shape[1], image.shape[2]), ground_truth, name,
                            image.shape[0], k_clusters, sim_func, sim_arg, recompute)
 
@@ -193,12 +193,30 @@ def read_spectral_eval(name, k, resolution, sim_func, sim_arg):
     assert path.exists(path.join(dir, name + '.eval')), 'Evaluation file is missing or not found'
     return np.load(path.join(dir, name + '.npy')), load_eval_data(path.join(dir, name + '.eval'))
 
+def big_picture_eval():
+    from visualize_data import visualize_data
+    from itertools import islice
+    from spectral_clustering import knn
+    for img, gt_iter, fname in islice(reader.request_data(),5):
+        kmeans_ouput = kmeans(img,k=5)
+        visualize_data(kmeans_ouput, gt_iter, fname)
+    for img, gt_iter, fname in islice(reader.request_data(),5):
+        visualize_data(
+            spectral_clustering(img,k=5),
+            gt_iter,
+            fname
+        )
+    for img, gt_iter,fname in islice(reader.request_data(), 5):
+        visualize_data(
+            kmeans(img, k=5),
+            spectral_clustering(img, k=5, knn, 5)
+        )
 
 if __name__ == '__main__':
     environ['MKL_DYNAMIC'] = 'false'
-    for k in [3, 5, 7, 9, 11]:
-        evaluate_kmeans(KMEANS_DIR, k)
+    for k in [7, 9]:
+        # evaluate_kmeans(KMEANS_DIR, k)
         # for gamma in [1, 10]:
         #     evaluate_spectral(SPECTRAL_DIR, k, rbf, gamma)
-        # for n_neighbours in [5]:
-        #     evaluate_spectral(SPECTRAL_DIR, k, knn, n_neighbours)
+        for n_neighbours in [5]:
+            evaluate_spectral(SPECTRAL_DIR, k, knn, n_neighbours)
