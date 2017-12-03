@@ -1,10 +1,10 @@
-import resource_reader as rr 
+import src.resource_reader as rr
 import matplotlib.pyplot as plt
 
 
-def visualize_data(image, groundtruth, name):
+def visualize_data(image, groundtruth, name,fignum=None):
 
-        fig = plt.figure()
+        fig = plt.figure(fignum)
         a = fig.add_subplot(1, 6, 1)
         plt.imshow(image)
         a.set_title(name)
@@ -15,7 +15,7 @@ def visualize_data(image, groundtruth, name):
                 a = fig.add_subplot(1, 6, i)
                 plt.imshow(boundaries, cmap='Greys')
                 a.axis('off')
-                a = fig.add_subplot(2, 6, i)
+                a = fig.add_subplot(1, 6, i)
                 plt.imshow(segmentation)
                 a.set_title('bound'+str(i-1))
                 i = i+1
@@ -33,11 +33,14 @@ def visualize_data(image, groundtruth, name):
             #         i = i+1
             #         a.axis('off')
         plt.show()
+
+
 def show_images(images):
-    fig, axis = plt.subplots(5)
-    for img, ax in zip(images,axis):
+    fig, axis = plt.subplots(2)
+    for img, ax in zip(images, axis):
         ax.imshow(img)
-    fig.show()
+# fig.show()
+    plt.show()
 
 if __name__ == '__main__':
     img, gtruth, s = next(rr.request_data())
